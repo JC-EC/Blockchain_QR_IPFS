@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Certificado Sacramental</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Times+New+Roman&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+      body {
+        font-family: "Times New Roman", serif;
+        background: #fdfaf5;
+        padding: 30px;
+      }
+      .cert-wrap {
+        border: 2px solid #d4af37;
+        padding: 40px;
+        text-align: center;
+        background: #fff;
+      }
+      .title {
+        font-family: "Great Vibes";
+        font-size: 42px;
+        color: #2c3e50;
+        margin-bottom: 20px;
+      }
+      .fields p {
+        margin: 6px 0;
+        font-size: 20px;
+      }
+      .qr {
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <script>
+    // Guardar PDF automáticamente
+    document.getElementById("guardarPDF").addEventListener("click", () => {
+      const elemento = document.getElementById("certificado"); // Div del certificado
+      const opt = {
+        margin: 0.5,
+        filename: "{{ archivo_base }}.pdf", // nombre dinámico
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+      };
+      html2pdf().set(opt).from(elemento).save();
+    });
+
+    // Botón regresar y limpiar formulario
+    document.getElementById("regresar").addEventListener("click", () => {
+      window.location.href = "/"; // Vuelve al index
+    });
+  </script>
+
+  <body>
+    <div class="cert-wrap">
+      <h1 class="title">Certificado Sacramental de {{ data.tipo }}</h1>
+      <p>Se certifica que:</p>
+      <h2>{{ data.nombre }} {{ data.apellido }}</h2>
+
+      {% if data.tipo == "Bautismo" %}
+      <div class="fields">
+        <p>
+          Tomo: {{ data.tomo }} · Página: {{ data.pagina }} · Número: {{
+          data.numero }}
+        </p>
+        <p>Fecha: {{ data.fecha }}</p>
+        <p>Lugar y fecha de nacimiento: {{ data.nacimiento }}</p>
+        <p>Padre: {{ data.padre }} · Madre: {{ data.madre }}</p>
+        <p>Padrino/Madrina: {{ data.madrina }}</p>
+        <p>Ministro: {{ data.ministro }}</p>
+        <p>
+          Registro Civil: Año {{ data.regA }}, Tomo {{ data.regT }}, Página {{
+          data.regP }}, Acta {{ data.regAc }}
+        </p>
+      </div>
+      {% elif data.tipo == "Comunión" or data.tipo == "Confirmación" %}
+      <p>Con cédula N° <strong>{{ data.cedula }}</strong></p>
+      <p>Realizó el sacramento de {{ data.tipo }} en el año {{ data.anio }}.</p>
+      {% elif data.tipo == "Matrimonio" %}
+      <p>El día {{ data.fechaMat }}, contrajeron matrimonio:</p>
+      <p>
+        <strong>{{ data.esposo }}</strong> y <strong>{{ data.esposa }}</strong>
+      </p>
+      <p>Padrinos: {{ data.padrinos }}</p>
+      <p>Ministro del Matrimonio: {{ data.ministro }}</p>
+      {% endif %}
+
+      <p><b>Fecha de Registro:</b> {{ timestamp | ecuador_time }}</p>
+
+      <div class="qr">
+        <img src="/{{ qr_path }}" alt="Código QR" width="150" />
+      </div>
+
+      <p>
+        Verificar autenticidad:
+        <a href="{{ verificar_url }}" target="_blank">{{ verificar_url }}</a>
+      </p>
+
+      {% if ipfs_pdf_url %}
+      <p>
+        Ver PDF en IPFS:
+        <a href="{{ ipfs_pdf_url }}" target="_blank">{{ ipfs_pdf_url }}</a>
+      </p>
+      {% endif %}
+
+      <button onclick="regresar()">↩️ Nuevo Registro</button>
+    </div>
+    <script>
+      function regresar() {
+        // Redirige al formulario (index.html en este caso)
+        window.location.href = "http://127.0.0.1:5000";
+      }
+    </script>
+  </body>
+</html>
